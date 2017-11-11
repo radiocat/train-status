@@ -9,7 +9,7 @@ app.listen(app.get('port'), function() {
   console.log('Node app is running on port', app.get('port'));
 });
 
-app.get('/', function(request, response, next) {
+app.all('/', function(request, response, next) {
   
   //Dialogflowからのパラメータ取得
   const train = (function (req) {
