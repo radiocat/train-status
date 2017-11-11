@@ -1,0 +1,32 @@
+{
+  "name": "radiocat-train-status",
+  "version": "0.0.1",
+  "description": "A sample Node.js",
+  "engines": {
+    "node": "6.11.1"
+  },
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js"
+  },
+  "dependencies": {
+    "express": "4.15.2",
+    "cheerio-httpcli": "^0.7.2"
+  },
+  "devDependencies": {
+    "request": "^2.81.0",
+    "tape": "^4.7.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "node",
+    "express",
+    "heroku",
+    "cheerio-httpcli"
+  ],
+  "license": "Unlicense"
+}

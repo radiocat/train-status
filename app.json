@@ -1,0 +1,7 @@
+{
+  "name": "Radiocat Train Status",
+  "description": "A barebones Node.js app",
+  "repository": "",
+  "keywords": ["node", "heroku"],
+  "image": "heroku/nodejs"
+}
