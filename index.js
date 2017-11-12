@@ -1,6 +1,7 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 var client = require('cheerio-httpcli');
+var util = require('util');
 
 var app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -15,7 +16,7 @@ app.post('/', function(request, response, next) {
   
   //Dialogflowからのパラメータ取得
   const train = (function (req) {
-      console.log('[REQUEST]', req.body);
+      console.log('[REQUEST]', util.inspect(req.body,false,null));
       if (req.body && req.body.result) {
         return req.body.result.parameters.Train
       }
