@@ -25,7 +25,7 @@ app.post('/', function(request, response, next) {
   
   var sendResponse = function(response, word){
       //Dialogflowへ`speech`と`displayText`の情報を返す
-      response.setHeader("Content-Type", "application/json")
+      response.setHeader("Content-Type", "application/json");
       response.send(
         JSON.stringify({
           "speech": word , "displayText": word
