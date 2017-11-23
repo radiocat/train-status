@@ -34,10 +34,9 @@ app.post('/', function(request, response, next) {
   };
   
   if (train === "hankyu") {
-    // スクレイピング開始
+    // 阪急の運行情報を調べる
     client.fetch('http://www.hankyu.co.jp/railinfo/', {}, function (err, $, res) {
-      console.log("access hankyu2");
-      // 記事のタイトルを取得
+      console.log("access hankyu");
       var word = $('.all_route > p', '#railinfo').text();
       console.log(word);
       sendResponse(response, word);
