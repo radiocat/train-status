@@ -13,33 +13,101 @@ app.listen(app.get('port'), function() {
 });
 
 app.post('/', function(request, response, next) {
+  const HANKYU_URL = 'http://www.hankyu.co.jp/railinfo/';
   
+  if (!request.body) {
+    response.status(400).send(http.STATUS_CODES[400] + '\r\n');
+    return ;
+  }
+  console.log('[REQUEST]', util.inspect(request.body,false,null));
+
   //Dialogflowからのパラメータ取得
-  const train = (function (req) {
-      console.log('[REQUEST]', util.inspect(req.body,false,null));
-      if (req.body && req.body.result) {
-        return req.body.result.parameters.Train
+  const train = (function (result) {
+      if (result) {
+        return result.parameters.Train
       }
       return '';
-  })(request);
+  })(request.body.result);
+
+  const hasScreen = (function (data) {
+      if (data.surface && data.surface.capabilities) {
+        for (let v of data.surface.capabilities) {
+          if (v.name === 'actions.capability.SCREEN_OUTPUT'){
+            console.log('ENABLE SCREEN_OUTPUT');
+            return true;
+          };
+        };
+      }
+      return false;
+  })(request.body.originalRequest.data);
+
+  var createResultObject =  function (hasScreen, word, basicCard) {
+      if (hasScreen) {
+        return  {
+          "speech": word,
+          "data": {
+            "google": {
+              "expectUserResponse": false,
+              "richResponse": {
+                "items": [
+                  {
+                    "simpleResponse": {
+                      "textToSpeech": word
+                    }
+                  },
+                  basicCard
+                ],
+                "suggestions": []
+              }
+            },
+            "possibleIntents": [
+              {
+                "intent": "actions.intent.TEXT"
+              }
+            ]
+        }
+      };
+    }
+    return {
+      "speech": word , "displayText": word
+    };
+  };
   
-  var sendResponse = function(response, word){
-      //Dialogflowへ`speech`と`displayText`の情報を返す
-      response.setHeader("Content-Type", "application/json");
-      response.send(
-        JSON.stringify({
-          "speech": word , "displayText": word
-        })
-      );
+  var sendResponse = function(response, resultObject){
+    response.setHeader("Content-Type", "application/json");
+    response.send(JSON.stringify(resultObject));
   };
   
   if (train === "hankyu") {
     // 阪急の運行情報を調べる
-    client.fetch('http://www.hankyu.co.jp/railinfo/', {}, function (err, $, res) {
+    client.fetch(HANKYU_URL, {}, function (err, $, res) {
       console.log("access hankyu");
       var word = $('.all_route > p', '#railinfo').text();
+      // 遅れがある時だけ以下が取得できる
+      $('#railinfo_02 > div:nth-child(2) > div > p').each(function (idx) {
+          word = $(this).text();
+      });
       console.log(word);
-      sendResponse(response, word);
+      var basicCard = {
+        "basicCard": {
+          "title": "阪急電鉄運行情報",
+          "formattedText": "阪急電鉄運行状況は、4:30から25:00までの間、20分以上の遅れが発生した、もしくは見込まれる場合に情報を提供いたします。",
+          "image": {
+              "url": "http://www.hankyu.co.jp/images/common/logo.png",
+              "accessibilityText": "阪急電鉄"
+          },
+          "buttons": [
+            {
+              "title": "Read more",
+              "openUrlAction": {
+                "url": HANKYU_URL
+              }
+            }
+          ]
+        }
+      };
+
+      sendResponse(response, createResultObject(hasScreen, word, basicCard));
     });
   } else {
     sendResponse(response, (function (train){
